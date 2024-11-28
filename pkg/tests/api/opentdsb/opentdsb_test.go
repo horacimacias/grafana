@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana/pkg/api/dtos"
@@ -35,6 +36,18 @@ func TestIntegrationOpenTSDB(t *testing.T) {
 
 	grafanaListeningAddr, testEnv := testinfra.StartGrafanaEnv(t, dir, path)
 	ctx := context.Background()
+
+	// TODO: remove
+	assert.Equal(t, "db_type", testEnv.SQLStore.GetDBType())
+	assert.Equal(t, "db_inner_type", fmt.Sprintf("%T", testEnv.SQLStore))
+
+	body := ""
+	sections := testEnv.Cfg.Raw.Sections()
+	for _, section := range sections {
+		body += section.Body()
+	}
+	assert.Equal(t, "cfg", body)
+	// TODO: remove
 
 	u := testinfra.CreateUser(t, testEnv.SQLStore, testEnv.Cfg, user.CreateUserCommand{
 		DefaultOrgRole: string(org.RoleAdmin),
